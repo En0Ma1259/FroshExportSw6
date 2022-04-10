@@ -1,0 +1,12 @@
+{% block sw_product_list_smart_bar_actions_add %}
+    {% parent %}
+
+    {% block frosh_view_export_button %}
+        <sw-button
+            variant="primary"
+            @click="exportView()"
+        >
+            Create PRODUCTS EXPORT
+        </sw-button>
+    {% endblock %}
+{% endblock %}

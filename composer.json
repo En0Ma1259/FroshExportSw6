@@ -1,0 +1,42 @@
+{
+    "name": "frosh/view-exporter",
+    "description": "Export Elements in current view",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "keywords": [
+    ],
+    "autoload": {
+      "psr-4": {
+        "Frosh\\ViewExporter\\": "src/"
+      }
+    },
+    "authors": [
+      {
+        "name": "FriendsOfShopware",
+        "homepage": "https://friendsofshopware.de"
+      }
+    ],
+    "extra": {
+      "shopware-plugin-class": "Frosh\\ViewExporter\\FroshViewExporter",
+      "plugin-icon": "src/Resources/config/plugin.png",
+      "label": {
+        "de-DE": "Frosh View Exporter",
+        "en-GB": "Frosh View Exporter"
+      },
+      "description": {
+        "de-DE": "Export Elements in current view",
+        "en-GB": "Export Elements in current view"
+      },
+      "manufacturerLink": {
+        "de-DE": "https://github.com/FriendsOfShopware/REPO-NAME",
+        "en-GB": "https://github.com/FriendsOfShopware/REPO-NAME"
+      },
+      "supportLink": {
+        "de-DE": "https://github.com/FriendsOfShopware/REPO-NAME/issues",
+        "en-GB": "https://github.com/FriendsOfShopware/REPO-NAME/issues"
+      }
+    },
+    "require": {
+      "shopware/core": "~6.4.0"
+    }
+  }

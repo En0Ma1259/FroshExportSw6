@@ -1,0 +1,67 @@
+{% block frosh_export_detail %}
+    <sw-page class="frosh-export-detail">
+
+        {% block frosh_export_detail_actions %}
+            <template slot="smart-bar-actions">
+                {% block frosh_export_detail_actions_abort %}
+                    <sw-button
+                        :disabled="isLoading"
+                        @click="onCancel">
+                        {{ $tc('frosh-export.detail.cancel') }}
+                    </sw-button>
+                {% endblock %}
+
+                {% block frosh_export_detail_actions_save %}
+                    <sw-button-process
+                        class="sw-product-detail__save-action"
+                        :isLoading="isLoading"
+                        :processSuccess="processSuccess"
+                        :disabled="isLoading"
+                        variant="primary"
+                        @process-finish="saveFinish"
+                        @click="onClickSave"
+                    >
+                        {{ $tc('frosh-export.detail.save') }}
+                    </sw-button-process>
+                {% endblock %}
+
+            </template>
+        {% endblock %}
+
+        <template slot="content">
+            <sw-card-view>
+                {% block frosh_export_detail_content %}
+
+                    <sw-card :title="$tc('frosh-export.detail.baseLabel')"
+                             v-if="entity">
+                        <sw-text-field
+                            v-model="entity.name"
+                            :label="$tc('frosh-export.detail.name')"
+                            value="entity.name"
+                            :required="true">
+                        </sw-text-field>
+                        <sw-text-field
+                            v-model="entity.entity"
+                            :label="$tc('frosh-export.detail.entity')"
+                            value="entity.entity"
+                            :required="true">
+                        </sw-text-field>
+
+                        <sw-multi-tag-select
+                            v-model="entity.fields"
+                            :label="$tc('frosh-export.detail.entity')"
+                            :placeholder="$tc('frosh-export.detail.fields')"
+                        >
+                            <template #message-add-data>
+                                <span>{{ $tc('frosh-export.detail.addField') }}</span>
+                            </template>
+                            <template #message-enter-valid-data>
+                                <span>{{ $tc('frosh-export.detail.enterField') }}</span>
+                            </template>
+                        </sw-multi-tag-select>
+                    </sw-card>
+                {% endblock %}
+            </sw-card-view>
+        </template>
+    </sw-page>
+{% endblock %}

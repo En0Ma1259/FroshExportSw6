@@ -1,0 +1,58 @@
+{% block frosh_export_list %}
+    <sw-page class="frosh-export-list">
+
+        {% block sw_product_list_search_bar %}
+            <template #search-bar>
+                <sw-search-bar initialSearchType="frosh_export"
+                               :initialSearch="term"
+                               @search="onSearch">
+                </sw-search-bar>
+            </template>
+        {% endblock %}
+
+        {% block sw_product_list_smart_bar_header %}
+            <template #smart-bar-header>
+                {% block sw_product_list_smart_bar_header_title %}
+                    <h2>
+                        {% block sw_product_list_smart_bar_header_title_text %}
+                            {{ $tc('frosh-export.general.mainMenuItemGeneral') }}
+                        {% endblock %}
+
+                        {% block sw_product_list_smart_bar_header_amount %}
+                            <span v-if="!isLoading" class="sw-page__smart-bar-amount">
+                                ({{ total }})
+                            </span>
+                        {% endblock %}
+                    </h2>
+                {% endblock %}
+            </template>
+        {% endblock %}
+
+        {% block frosh_export_list_smart_bar_actions %}
+            <template #smart-bar-actions>
+                {% block frosh_export_list_smart_bar_actions_add %}
+                    <sw-button :routerLink="{ name: 'frosh.export.create' }" variant="primary">
+                        {{ $tc('frosh-export.list.create') }}
+                    </sw-button>
+                {% endblock %}
+            </template>
+        {% endblock %}
+
+        <template #content>
+            {% block frosh_export_list_content %}
+                <div class="frosh-export-list__content">
+
+                    <sw-entity-listing
+                        v-if="entities"
+                        :items="entities"
+                        :repository="froshExportRepository"
+                        :showSelection="false"
+                        :columns="columns"
+                        detailRoute="frosh.export.detail"
+                    >
+                    </sw-entity-listing>
+                </div>
+            {% endblock %}
+        </template>
+    </sw-page>
+{% endblock %}
