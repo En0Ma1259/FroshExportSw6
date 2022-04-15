@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Export;
+namespace Frosh\Exporter\Export;
 
-use Frosh\ViewExporter\Entity\FroshExportEntity;
-use Frosh\ViewExporter\Export\Formatter\AbstractFormatter;
+use Frosh\Exporter\Entity\FroshExportEntity;
+use Frosh\Exporter\Export\Formatter\AbstractFormatter;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -44,12 +44,12 @@ class Exporter
         $formatter->setFilename($fileName);
 
         try {
-            $formatter->startFile();
+            $formatter->startFile($froshExport);
             $this->reader->readEntities($froshExport, $formatter);
         } finally {
-            $formatter->endFile();
+            $formatter->endFile($froshExport);
         }
 
-        return 'frosh-export/' . $formatter->getFilename();
+        return 'frosh-export/' . $formatter->getFilename(false);
     }
 }

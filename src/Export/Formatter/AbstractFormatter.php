@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Export\Formatter;
+namespace Frosh\Exporter\Export\Formatter;
 
-use Frosh\ViewExporter\Entity\FroshExportEntity;
+use Frosh\Exporter\Entity\FroshExportEntity;
 use League\Flysystem\Filesystem;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
@@ -11,8 +11,6 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 abstract class AbstractFormatter
 {
     public string $fileName;
-
-    protected array $data = [];
 
     protected Filesystem $filesystem;
 
@@ -26,33 +24,28 @@ abstract class AbstractFormatter
 
     abstract public function writeItem($item): void;
 
-    abstract public function __toString(): string;
-
     public function setFilename(string $fileName): void
     {
         $this->fileName = $fileName . '.' . static::fileExtension();
     }
 
-    public function startFile(): void
+    public function startFile(FroshExportEntity $exportEntity): void
     {
-        $this->filesystem->delete($this->fileName);
+        $this->filesystem->delete($this->getFilename());
     }
 
-    public function writeFile(): void
+    public function endFile(FroshExportEntity $exportEntity): void
     {
-        $this->filesystem->put($this->fileName, $this->__toString());
+        $this->filesystem->delete($this->getFilename(false));
+        $this->filesystem->rename($this->getFilename(), $this->getFilename(false));
     }
 
-    public function endFile(): void
+    public function getFilename(bool $temp = true): string
     {
+        return $this->fileName . ($temp ? '.temp' : '');
     }
 
-    public function getFilename(): string
-    {
-        return $this->fileName;
-    }
-
-    public function enrichData(FroshExportEntity $exportEntity, EntitySearchResult $searchResult, bool $direct): void
+    public function enrichData(FroshExportEntity $exportEntity, EntitySearchResult $searchResult): void
     {
         foreach ($searchResult as $item) {
             $values = [];
@@ -60,11 +53,7 @@ abstract class AbstractFormatter
                 $values[$key] = $this->getFieldValue($item, explode('.', $attribute));
             }
 
-            if ($direct) {
-                $this->writeItem($values);
-            } else {
-                $this->data[] = $values;
-            }
+            $this->writeItem($values);
         }
     }
 
@@ -87,11 +76,11 @@ abstract class AbstractFormatter
         return $value;
     }
 
-    protected function getCollectionValues(EntityCollection $collection, array $fields)
+    protected function getCollectionValues(EntityCollection $collection, array $fields): array
     {
         $data = [];
         foreach ($collection as $item) {
-            $data[] = $this->getFieldValue($item, $fields);
+            $data[$item->getUniqueIdentifier()] = $this->getFieldValue($item, $fields);
         }
 
         return $data;

@@ -14,17 +14,18 @@
 
     <services>
         <!-- Adapter -->
-        <service class="Frosh\ViewExporter\Adapter\FroshExportAdapterFactory" id="Shopware\Core\Framework\Adapter\Filesystem\FilesystemFactory.frosh">
+        <service class="Frosh\Exporter\Adapter\FroshExportAdapterFactory"
+                 id="Shopware\Core\Framework\Adapter\Filesystem\FilesystemFactory.frosh">
             <tag name="shopware.filesystem.factory"/>
         </service>
 
         <!-- Controller -->
-        <service id="Frosh\ViewExporter\Controller\ListingExportController" public="true">
+        <service id="Frosh\Exporter\Controller\ListingExportController" public="true">
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
             <argument type="service" id="api.request_criteria_builder"/>
-            <argument type="service" id="frosh_export.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="messenger.bus.shopware"/>
-            <argument type="service" id="Frosh\ViewExporter\Export\Exporter"/>
+            <argument type="service" id="Frosh\Exporter\Export\Exporter"/>
 
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
@@ -32,29 +33,29 @@
         </service>
 
         <!-- Entity -->
-        <service id="Frosh\ViewExporter\Entity\FroshExportDefinition">
+        <service id="Frosh\Exporter\Entity\FroshExportDefinition">
             <tag name="shopware.entity.definition" entity="frosh_export"/>
         </service>
 
         <!-- Extension -->
-        <service id="Frosh\ViewExporter\Core\Content\ProductStream\ProductStreamExtension">
+        <service id="Frosh\Exporter\Core\Content\ProductStream\ProductStreamExtension">
             <tag name="shopware.entity.extension"/>
         </service>
 
         <!-- Export -->
-        <service id="Frosh\ViewExporter\Export\Exporter">
+        <service id="Frosh\Exporter\Export\Exporter">
             <argument type="service" id="frosh_export.repository"/>
-            <argument type="service" id="Frosh\ViewExporter\Export\Reader"/>
+            <argument type="service" id="Frosh\Exporter\Export\Reader"/>
             <argument type="service" id="service_container"/>
         </service>
-        <service id="Frosh\ViewExporter\Export\Reader">
+        <service id="Frosh\Exporter\Export\Reader">
             <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
             <argument type="service" id="Shopware\Core\Content\ProductStream\Service\ProductStreamBuilder"/>
         </service>
 
         <!-- Message -->
-        <service id="Frosh\ViewExporter\Message\FroshExportHandler">
-            <argument type="service" id="Frosh\ViewExporter\Export\Exporter"/>
+        <service id="Frosh\Exporter\Message\FroshExportHandler">
+            <argument type="service" id="Frosh\Exporter\Export\Exporter"/>
             <tag name="messenger.message_handler"/>
         </service>
 
@@ -63,20 +64,20 @@
             <factory service="Shopware\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="factory"/>
             <argument>%frosh-export.filesystem.public%</argument>
         </service>
-        <service id="Frosh\ViewExporter\Export\Formatter\AbstractFormatter"
+        <service id="Frosh\Exporter\Export\Formatter\AbstractFormatter"
                  public="true">
             <argument type="service" id="frosh.filesystem.public"/>
         </service>
 
         <service
             id="frosh.export.formatter.json"
-            class="Frosh\ViewExporter\Export\Formatter\Json"
-            parent="Frosh\ViewExporter\Export\Formatter\AbstractFormatter"
+            class="Frosh\Exporter\Export\Formatter\Json"
+            parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
             public="true"/>
         <service
             id="frosh.export.formatter.csv"
-            class="Frosh\ViewExporter\Export\Formatter\CSV"
-            parent="Frosh\ViewExporter\Export\Formatter\AbstractFormatter"
+            class="Frosh\Exporter\Export\Formatter\CSV"
+            parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
             public="true"/>
     </services>
 </container>

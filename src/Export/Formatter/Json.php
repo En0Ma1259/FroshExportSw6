@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Export\Formatter;
+namespace Frosh\Exporter\Export\Formatter;
+
+use Frosh\Exporter\Entity\FroshExportEntity;
 
 class Json extends AbstractFormatter
 {
@@ -9,26 +11,23 @@ class Json extends AbstractFormatter
         return 'json';
     }
 
-    public function startFile(): void
+    public function startFile(FroshExportEntity $exportEntity): void
     {
-        parent::startFile();
+        parent::startFile($exportEntity);
 
-        $this->filesystem->put($this->fileName, '[');
+        $this->filesystem->put($this->getFilename(), '[');
     }
 
-    public function endFile(): void
+    public function endFile(FroshExportEntity $exportEntity): void
     {
         // TODO: Remove last ',' and empty element '{}'
-        $this->filesystem->put($this->fileName, '{}]');
+        $this->filesystem->put($this->getFilename(), '{}]');
+
+        parent::endFile($exportEntity);
     }
 
     public function writeItem($item): void
     {
-        $this->filesystem->put($this->fileName, json_encode($item, JSON_THROW_ON_ERROR) . ',');
-    }
-
-    public function __toString(): string
-    {
-        return json_encode($this->data, JSON_THROW_ON_ERROR);
+        $this->filesystem->put($this->getFilename(), json_encode($item, JSON_THROW_ON_ERROR) . ',');
     }
 }

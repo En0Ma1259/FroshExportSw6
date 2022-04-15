@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Message;
+namespace Frosh\Exporter\Message;
 
-use Frosh\ViewExporter\Export\Exporter;
+use Frosh\Exporter\Export\Exporter;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class FroshExportHandler implements MessageHandlerInterface

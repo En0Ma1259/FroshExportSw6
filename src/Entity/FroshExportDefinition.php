@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Entity;
+namespace Frosh\Exporter\Entity;
 
 use Shopware\Core\Content\ProductStream\ProductStreamDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
@@ -9,6 +9,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\ApiAware;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\PrimaryKey;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Required;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\WriteProtected;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\IdField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\ListField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField;
@@ -44,10 +45,10 @@ class FroshExportDefinition extends EntityDefinition
             (new StringField('formatter', 'formatter'))->addFlags(new Required()),
 
             new StringField('name', 'name'),
-            new BlobField('criteria', 'criteria'),
+            (new BlobField('criteria', 'criteria'))->removeFlag(ApiAware::class)->addFlags(new WriteProtected()),
             new ListField('fields', 'fields', StringField::class),
 
-            new FkField('language_id', 'languageId', UserDefinition::class),
+            new FkField('language_id', 'languageId', LanguageDefinition::class),
             new FkField('user_id', 'userId', UserDefinition::class),
             new FkField('product_stream_id', 'productStreamId', ProductStreamDefinition::class),
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Entity;
+namespace Frosh\Exporter\Entity;
 
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 

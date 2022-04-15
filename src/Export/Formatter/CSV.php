@@ -1,32 +1,29 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Export\Formatter;
+namespace Frosh\Exporter\Export\Formatter;
 
-use Frosh\ViewExporter\Entity\FroshExportEntity;
+use Frosh\Exporter\Entity\FroshExportEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 
 class CSV extends AbstractFormatter
 {
-    public function enrichData(FroshExportEntity $exportEntity, EntitySearchResult $searchResult, bool $direct): void
+    public function startFile(FroshExportEntity $exportEntity): void
     {
-        if (empty($this->data)) {
-            if ($direct) {
-                $this->writeItem(array_keys($this->formatAttributes($exportEntity->getFields())));
-            } else {
-                $this->data[] = $this->formatAttributes($exportEntity->getFields());
-            }
-        }
+        parent::startFile($exportEntity);
 
-        parent::enrichData($exportEntity, $searchResult, $direct);
+        $this->writeItem(array_keys($this->formatAttributes($exportEntity->getFields())));
     }
 
-    protected function getCollectionValues(EntityCollection $collection, array $fields)
+    protected function getFieldValue(Entity $entity, array $fields)
     {
-        $value = null;
-        if ($collection->first() !== null) {
-            $value = $this->getFieldValue($collection->first(), $fields);
+        $value = parent::getFieldValue($entity, $fields);
+
+        if (is_array($value)) {
+            $value = array_shift($value);
+        }
+
+        if (is_string($value) && strpos($value, '"') !== 0) {
+            $value = '"' . $value . '"';
         }
 
         return $value;
@@ -39,11 +36,6 @@ class CSV extends AbstractFormatter
 
     public function writeItem($item): void
     {
-        $this->filesystem->put($this->fileName, implode(';', $item) . "\n");
-    }
-
-    public function __toString(): string
-    {
-        return implode("\n", $this->data);
+        $this->filesystem->put($this->getFilename(), implode(';', $item) . "\n");
     }
 }

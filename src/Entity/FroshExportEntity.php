@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Entity;
+namespace Frosh\Exporter\Entity;
 
 use Shopware\Core\Content\ProductStream\ProductStreamEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
@@ -111,7 +111,7 @@ class FroshExportEntity extends Entity
     public function getRealCriteria(): Criteria
     {
         if (!isset($this->realCriteria)) {
-            $this->realCriteria = unserialize($this->criteria, [Criteria::class]);
+            $this->realCriteria = $this->criteria === null ? new Criteria() : unserialize($this->criteria, [Criteria::class]);
         }
 
         return $this->realCriteria;

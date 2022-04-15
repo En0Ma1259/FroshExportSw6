@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Adapter;
+namespace Frosh\Exporter\Adapter;
 
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\AdapterInterface;

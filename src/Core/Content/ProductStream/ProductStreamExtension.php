@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Core\Content\ProductStream;
+namespace Frosh\Exporter\Core\Content\ProductStream;
 
-use Frosh\ViewExporter\Entity\FroshExportDefinition;
+use Frosh\Exporter\Entity\FroshExportDefinition;
 use Shopware\Core\Content\Media\MediaDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToManyAssociationField;
