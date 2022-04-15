@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Message;
+namespace Frosh\Exporter\Message;
 
 class FroshExportMessage
 {

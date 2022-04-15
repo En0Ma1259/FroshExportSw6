@@ -1,11 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Frosh\ViewExporter\Controller;
+namespace Frosh\Exporter\Controller;
 
-use Frosh\ViewExporter\Export\Exporter;
-use Frosh\ViewExporter\Message\FroshExportMessage;
+use Doctrine\DBAL\Connection;
+use Frosh\Exporter\Export\Exporter;
+use Frosh\Exporter\Message\FroshExportMessage;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\Doctrine\RetryableQuery;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\RequestCriteriaBuilder;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,22 +25,40 @@ class ListingExportController extends AbstractController
 {
     protected DefinitionInstanceRegistry $definitionRegistry;
     protected RequestCriteriaBuilder     $criteriaBuilder;
-    protected EntityRepositoryInterface  $entityRepository;
+    protected Connection                 $connection;
     protected MessageBusInterface        $messageBus;
     protected Exporter                   $exporter;
 
     public function __construct(
         DefinitionInstanceRegistry $definitionRegistry,
         RequestCriteriaBuilder     $criteriaBuilder,
-        EntityRepositoryInterface  $entityRepository,
+        Connection                 $connection,
         MessageBusInterface        $messageBus,
         Exporter                   $exporter
     ) {
         $this->definitionRegistry = $definitionRegistry;
         $this->criteriaBuilder    = $criteriaBuilder;
-        $this->entityRepository   = $entityRepository;
+        $this->connection         = $connection;
         $this->messageBus         = $messageBus;
         $this->exporter           = $exporter;
+    }
+
+    /**
+     * @Route("/api/frosh/export/criteria/{id}/{entity}", name="api.frosh.export.criteria", methods={"POST"})
+     */
+    public function updateCustomCriteria(Request $request, Context $context, string $id, string $entity): Response
+    {
+        $criteria         = new Criteria();
+        $entityDefinition = $this->definitionRegistry->getByEntityName($entity);
+        $this->criteriaBuilder->handleRequest($request, $criteria, $entityDefinition, $context);
+
+        $query = new RetryableQuery(
+            $this->connection,
+            $this->connection->prepare('UPDATE `frosh_export` SET `criteria` = :criteria WHERE `id` = UNHEX(:id)')
+        );
+        $query->execute(['id' => $id, 'criteria' => serialize($criteria)]);
+
+        return new Response();
     }
 
     /**
