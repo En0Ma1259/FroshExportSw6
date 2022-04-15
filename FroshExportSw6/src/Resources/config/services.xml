@@ -1,0 +1,83 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="frosh-export.filesystem.public" type="collection">
+            <parameter key="type">frosh</parameter>
+            <parameter key="config" type="collection">
+                <parameter key="root">%kernel.project_dir%/public/frosh-export</parameter>
+            </parameter>
+        </parameter>
+    </parameters>
+
+    <services>
+        <!-- Adapter -->
+        <service class="Frosh\Exporter\Adapter\FroshExportAdapterFactory"
+                 id="Shopware\Core\Framework\Adapter\Filesystem\FilesystemFactory.frosh">
+            <tag name="shopware.filesystem.factory"/>
+        </service>
+
+        <!-- Controller -->
+        <service id="Frosh\Exporter\Controller\ListingExportController" public="true">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="api.request_criteria_builder"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="Frosh\Exporter\Export\Exporter"/>
+
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <!-- Entity -->
+        <service id="Frosh\Exporter\Entity\FroshExportDefinition">
+            <tag name="shopware.entity.definition" entity="frosh_export"/>
+        </service>
+
+        <!-- Extension -->
+        <service id="Frosh\Exporter\Core\Content\ProductStream\ProductStreamExtension">
+            <tag name="shopware.entity.extension"/>
+        </service>
+
+        <!-- Export -->
+        <service id="Frosh\Exporter\Export\Exporter">
+            <argument type="service" id="frosh_export.repository"/>
+            <argument type="service" id="Frosh\Exporter\Export\Reader"/>
+            <argument type="service" id="service_container"/>
+        </service>
+        <service id="Frosh\Exporter\Export\Reader">
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="Shopware\Core\Content\ProductStream\Service\ProductStreamBuilder"/>
+        </service>
+
+        <!-- Message -->
+        <service id="Frosh\Exporter\Message\FroshExportHandler">
+            <argument type="service" id="Frosh\Exporter\Export\Exporter"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <!-- Formatter -->
+        <service class="League\Flysystem\FilesystemInterface" id="frosh.filesystem.public" public="true">
+            <factory service="Shopware\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="factory"/>
+            <argument>%frosh-export.filesystem.public%</argument>
+        </service>
+        <service id="Frosh\Exporter\Export\Formatter\AbstractFormatter"
+                 public="true">
+            <argument type="service" id="frosh.filesystem.public"/>
+        </service>
+
+        <service
+            id="frosh.export.formatter.json"
+            class="Frosh\Exporter\Export\Formatter\Json"
+            parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
+            public="true"/>
+        <service
+            id="frosh.export.formatter.csv"
+            class="Frosh\Exporter\Export\Formatter\CSV"
+            parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
+            public="true"/>
+    </services>
+</container>
