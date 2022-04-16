@@ -3,30 +3,20 @@
 namespace Frosh\Exporter\Export\Formatter;
 
 use Frosh\Exporter\Entity\FroshExportEntity;
-use Shopware\Core\Framework\DataAbstractionLayer\Entity;
+use Frosh\Exporter\Struct\ExportItem;
+use Frosh\Exporter\Struct\ExportItemCollection;
 
 class CSV extends AbstractFormatter
 {
+    protected array $fields = [];
+
     public function startFile(FroshExportEntity $exportEntity): void
     {
         parent::startFile($exportEntity);
 
-        $this->writeItem(array_keys($this->formatAttributes($exportEntity->getFields())));
-    }
+        $this->fields = $this->formatAttributes($exportEntity->getFields());
 
-    protected function getFieldValue(Entity $entity, array $fields)
-    {
-        $value = parent::getFieldValue($entity, $fields);
-
-        if (is_array($value)) {
-            $value = array_shift($value);
-        }
-
-        if (is_string($value) && strpos($value, '"') !== 0) {
-            $value = '"' . $value . '"';
-        }
-
-        return $value;
+        $this->filesystem->put($this->getFilename(), implode(';', array_keys($this->fields)) . "\n");
     }
 
     public static function fileExtension(): string
@@ -34,8 +24,29 @@ class CSV extends AbstractFormatter
         return 'csv';
     }
 
-    public function writeItem($item): void
+    protected function writeItem(ExportItem $item): void
     {
-        $this->filesystem->put($this->getFilename(), implode(';', $item) . "\n");
+        $values = [];
+        foreach ($this->fields as $field) {
+            $values[] = $this->formatValue($item, explode('.', $field));
+        }
+
+        $this->filesystem->put($this->getFilename(), implode(';', $values) . "\n");
+    }
+
+    protected function formatValue(ExportItem $item, array $fields)
+    {
+        $property = array_shift($fields);
+        $value    = $item->get($property);
+
+        if ($value instanceof ExportItem) {
+            $value = $this->formatValue($value, $fields);
+        }
+
+        if ($value instanceof ExportItemCollection) {
+            $value = $this->formatValue($value->first(), $fields);
+        }
+
+        return $value;
     }
 }

@@ -4,11 +4,9 @@ namespace Frosh\Exporter\Message;
 
 class FroshExportMessage
 {
-    protected string $froshExport;
-
-    public function __construct(string $froshExport)
-    {
-        $this->froshExport = $froshExport;
+    public function __construct(
+        protected string $froshExport
+    ) {
     }
 
     public function getFroshExport(): string

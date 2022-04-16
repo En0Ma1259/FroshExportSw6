@@ -5,6 +5,7 @@ namespace Frosh\Exporter\Entity;
 use Shopware\Core\Content\ProductStream\ProductStreamDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\BlobField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\DateField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\ApiAware;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\PrimaryKey;
@@ -46,6 +47,7 @@ class FroshExportDefinition extends EntityDefinition
 
             new StringField('name', 'name'),
             (new BlobField('criteria', 'criteria'))->removeFlag(ApiAware::class)->addFlags(new WriteProtected()),
+            (new DateField('latest_execute', 'latestExecute'))->removeFlag(ApiAware::class)->addFlags(new WriteProtected()),
             new ListField('fields', 'fields', StringField::class),
 
             new FkField('language_id', 'languageId', LanguageDefinition::class),

@@ -25,6 +25,7 @@ class Migration1645884797InitTable extends MigrationStep
                 `language_id` BINARY(16) DEFAULT NULL,
                 `user_id` BINARY(16) DEFAULT NULL,
                 `product_stream_id` BINARY(16) DEFAULT NULL,
+                `latest_execute` DATETIME(3) NULL,
                 `created_at` DATETIME(3) NOT NULL,
                 `updated_at` DATETIME(3) NULL,
                 PRIMARY KEY (`id`),

@@ -7,11 +7,9 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 class FroshExportHandler implements MessageHandlerInterface
 {
-    protected Exporter $exporter;
-
-    public function __construct(Exporter $exporter)
-    {
-        $this->exporter = $exporter;
+    public function __construct(
+        protected Exporter $exporter
+    ) {
     }
 
     public function __invoke(FroshExportMessage $exportMessage): void
