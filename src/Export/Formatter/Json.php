@@ -3,6 +3,7 @@
 namespace Frosh\Exporter\Export\Formatter;
 
 use Frosh\Exporter\Entity\FroshExportEntity;
+use Frosh\Exporter\Struct\ExportItem;
 
 class Json extends AbstractFormatter
 {
@@ -26,7 +27,7 @@ class Json extends AbstractFormatter
         parent::endFile($exportEntity);
     }
 
-    public function writeItem($item): void
+    protected function writeItem(ExportItem $item): void
     {
         $this->filesystem->put($this->getFilename(), json_encode($item, JSON_THROW_ON_ERROR) . ',');
     }

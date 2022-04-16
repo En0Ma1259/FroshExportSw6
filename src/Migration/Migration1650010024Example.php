@@ -18,8 +18,8 @@ class Migration1650010024Example extends MigrationStep
 
     public function update(Connection $connection): void
     {
-        $pFields = '["name", "productNumber", "media.media.url"]';
-        $cFields = '["name", "products.productNumber"]';
+        $pFields = '["name", "productNumber", "media.media.url", "manufacturer.name", "manufacturer.description"]';
+        $cFields = '["name", "products.productNumber", "products.name", "products.manufacturer.name"]';
         $this->createExample($connection, 'json', 'product', $pFields);
         $this->createExample($connection, 'csv', 'product', $pFields);
         $this->createExample($connection, 'json', 'category', $cFields);

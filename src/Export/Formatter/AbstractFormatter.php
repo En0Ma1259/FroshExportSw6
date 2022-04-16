@@ -3,6 +3,7 @@
 namespace Frosh\Exporter\Export\Formatter;
 
 use Frosh\Exporter\Entity\FroshExportEntity;
+use Frosh\Exporter\Struct\ExportItem;
 use League\Flysystem\Filesystem;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
@@ -12,17 +13,15 @@ abstract class AbstractFormatter
 {
     public string $fileName;
 
-    protected Filesystem $filesystem;
-
-    public function __construct(Filesystem $filesystem)
-    {
-        $this->filesystem = $filesystem;
+    public function __construct(
+        protected Filesystem $filesystem
+    ) {
         $this->filesystem->getConfig()->set('disable_asserts', true);
     }
 
     abstract public static function fileExtension(): string;
 
-    abstract public function writeItem($item): void;
+    abstract protected function writeItem(ExportItem $item): void;
 
     public function setFilename(string $fileName): void
     {
@@ -48,42 +47,45 @@ abstract class AbstractFormatter
     public function enrichData(FroshExportEntity $exportEntity, EntitySearchResult $searchResult): void
     {
         foreach ($searchResult as $item) {
-            $values = [];
-            foreach ($this->formatAttributes($exportEntity->getFields()) as $key => $attribute) {
-                $values[$key] = $this->getFieldValue($item, explode('.', $attribute));
+            $exportItem = new ExportItem();
+            foreach ($exportEntity->getFields() as $attribute) {
+                $this->addFieldValue($item, explode('.', $attribute), $exportItem);
             }
 
-            $this->writeItem($values);
+            $this->writeItem($exportItem);
         }
     }
 
-    protected function getFieldValue(Entity $entity, array $fields)
+    protected function addFieldValue(Entity $entity, array $fields, ExportItem $exportItem): void
     {
         $property = array_shift($fields);
-        if (!$entity->has($property)) {
-            return null;
+        if (!$entity->has($property) && !$entity->hasExtension($property)) {
+            $exportItem->set($property, null);
+
+            return;
         }
 
         $value = $entity->get($property);
         if ($value instanceof Entity && !empty($fields)) {
-            $value = $this->getFieldValue($value, $fields);
+            $this->addFieldValue($value, $fields, $exportItem->getItem($property));
+
+            return;
         }
 
         if ($value instanceof EntityCollection && !empty($fields)) {
-            $value = $this->getCollectionValues($value, $fields);
+            $this->addCollectionValues($value, $fields, $exportItem, $property);
+
+            return;
         }
 
-        return $value;
+        $exportItem->set($property, $value);
     }
 
-    protected function getCollectionValues(EntityCollection $collection, array $fields): array
+    protected function addCollectionValues(EntityCollection $collection, array $fields, ExportItem $exportItem, string $property): void
     {
-        $data = [];
         foreach ($collection as $item) {
-            $data[$item->getUniqueIdentifier()] = $this->getFieldValue($item, $fields);
+            $this->addFieldValue($item, $fields, $exportItem->getCollectionItem($property, $item->getUniqueIdentifier()));
         }
-
-        return $data;
     }
 
     protected function formatAttributes(array $fields): array

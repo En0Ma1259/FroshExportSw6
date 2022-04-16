@@ -14,15 +14,10 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 
 class Reader
 {
-    protected DefinitionInstanceRegistry $definitionRegistry;
-    protected ProductStreamBuilder       $streamBuilder;
-
     public function __construct(
-        DefinitionInstanceRegistry $definitionRegistry,
-        ProductStreamBuilder       $streamBuilder
+        protected DefinitionInstanceRegistry $definitionRegistry,
+        protected ProductStreamBuilder       $streamBuilder
     ) {
-        $this->definitionRegistry = $definitionRegistry;
-        $this->streamBuilder      = $streamBuilder;
     }
 
     public function readEntities(FroshExportEntity $exportEntity, AbstractFormatter $formatter): void
@@ -32,14 +27,13 @@ class Reader
             $language = [$exportEntity->getLanguageId()];
         }
 
-        $context  = new Context(new SystemSource(), [], Defaults::CURRENCY, $language);
-        $criteria = $exportEntity->getRealCriteria();
-        $this->addAssociations($criteria, $exportEntity->getFields());
+        $context = new Context(
+            source: new SystemSource(),
+            languageIdChain: $language,
+            considerInheritance: true
+        );
 
-        if ($exportEntity->getProductStreamId() !== null) {
-            $this->addProductStreamFilter($criteria, $exportEntity->getProductStreamId(), $context);
-        }
-
+        $criteria           = $this->buildCriteria($exportEntity, $context);
         $entityRepository   = $this->definitionRegistry->getRepository($exportEntity->getEntity());
         $repositoryIterator = new RepositoryIterator($entityRepository, $context, $criteria);
         while (($result = $repositoryIterator->fetch()) !== null) {
@@ -48,6 +42,18 @@ class Reader
                 break;
             }
         }
+    }
+
+    protected function buildCriteria(FroshExportEntity $exportEntity, Context $context): Criteria
+    {
+        $criteria = $exportEntity->getRealCriteria();
+        $this->addAssociations($criteria, $exportEntity->getFields());
+
+        if ($exportEntity->getProductStreamId() !== null) {
+            $this->addProductStreamFilter($criteria, $exportEntity->getProductStreamId(), $context);
+        }
+
+        return $criteria;
     }
 
     protected function addProductStreamFilter(Criteria $criteria, string $productStreamId, Context $context): void

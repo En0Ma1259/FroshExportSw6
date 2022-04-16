@@ -23,31 +23,26 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ListingExportController extends AbstractController
 {
-    protected DefinitionInstanceRegistry $definitionRegistry;
-    protected RequestCriteriaBuilder     $criteriaBuilder;
-    protected Connection                 $connection;
-    protected MessageBusInterface        $messageBus;
-    protected Exporter                   $exporter;
 
     public function __construct(
-        DefinitionInstanceRegistry $definitionRegistry,
-        RequestCriteriaBuilder     $criteriaBuilder,
-        Connection                 $connection,
-        MessageBusInterface        $messageBus,
-        Exporter                   $exporter
+        protected DefinitionInstanceRegistry $definitionRegistry,
+        protected RequestCriteriaBuilder     $criteriaBuilder,
+        protected Connection                 $connection,
+        protected MessageBusInterface        $messageBus,
+        protected Exporter                   $exporter
     ) {
-        $this->definitionRegistry = $definitionRegistry;
-        $this->criteriaBuilder    = $criteriaBuilder;
-        $this->connection         = $connection;
-        $this->messageBus         = $messageBus;
-        $this->exporter           = $exporter;
     }
 
     /**
-     * @Route("/api/frosh/export/criteria/{id}/{entity}", name="api.frosh.export.criteria", methods={"POST"})
+     * @Route("/api/frosh/export/{id}/criteria", name="api.frosh.export.criteria", methods={"POST"})
      */
-    public function updateCustomCriteria(Request $request, Context $context, string $id, string $entity): Response
+    public function updateCustomCriteria(Request $request, Context $context, string $id): Response
     {
+        $entity = $this->connection->fetchOne('SELECT `entity` FROM `frosh_export` WHERE `id` = UNHEX(:id)', ['id' => $id]);
+        if ($entity === false) {
+            return new Response('No entity found', Response::HTTP_NOT_FOUND);
+        }
+
         $criteria         = new Criteria();
         $entityDefinition = $this->definitionRegistry->getByEntityName($entity);
         $this->criteriaBuilder->handleRequest($request, $criteria, $entityDefinition, $context);
@@ -62,7 +57,7 @@ class ListingExportController extends AbstractController
     }
 
     /**
-     * @Route("/api/frosh/export/trigger/{id}", name="api.frosh.export.trigger", methods={"GET"})
+     * @Route("/api/frosh/export/{id}/trigger", name="api.frosh.export.trigger", methods={"GET"})
      */
     public function triggerExport(string $id): Response
     {
