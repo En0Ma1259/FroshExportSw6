@@ -6,15 +6,11 @@ use Frosh\Exporter\Entity\FroshExportEntity;
 use Frosh\Exporter\Struct\ExportItem;
 use Frosh\Exporter\Struct\ExportItemCollection;
 
-class CSV extends AbstractFormatter
+class Csv extends AbstractFormatter
 {
-    protected array $fields = [];
-
     public function startFile(FroshExportEntity $exportEntity): void
     {
         parent::startFile($exportEntity);
-
-        $this->fields = $this->formatAttributes($exportEntity->getFields());
 
         $this->filesystem->put($this->getFilename(), implode(';', array_keys($this->fields)) . "\n");
     }

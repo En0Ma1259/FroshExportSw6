@@ -3,18 +3,23 @@
 namespace Frosh\Exporter\Export\Formatter;
 
 use Frosh\Exporter\Entity\FroshExportEntity;
+use Frosh\Exporter\Event\SpecialPropertyEvent;
 use Frosh\Exporter\Struct\ExportItem;
 use League\Flysystem\Filesystem;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFormatter
 {
     public string $fileName;
 
+    protected array $fields = [];
+
     public function __construct(
-        protected Filesystem $filesystem
+        protected Filesystem               $filesystem,
+        protected EventDispatcherInterface $eventDispatcher
     ) {
         $this->filesystem->getConfig()->set('disable_asserts', true);
     }
@@ -30,6 +35,7 @@ abstract class AbstractFormatter
 
     public function startFile(FroshExportEntity $exportEntity): void
     {
+        $this->fields = $this->formatAttributes($exportEntity->getFields());
         $this->filesystem->delete($this->getFilename());
     }
 
@@ -60,7 +66,8 @@ abstract class AbstractFormatter
     {
         $property = array_shift($fields);
         if (!$entity->has($property) && !$entity->hasExtension($property)) {
-            $exportItem->set($property, null);
+            $event = new SpecialPropertyEvent($entity, $exportItem, $property);
+            $this->eventDispatcher->dispatch($event);
 
             return;
         }

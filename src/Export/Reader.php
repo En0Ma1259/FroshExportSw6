@@ -5,7 +5,6 @@ namespace Frosh\Exporter\Export;
 use Frosh\Exporter\Entity\FroshExportEntity;
 use Frosh\Exporter\Export\Formatter\AbstractFormatter;
 use Shopware\Core\Content\ProductStream\Service\ProductStreamBuilder;
-use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Api\Context\SystemSource;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Dbal\Common\RepositoryIterator;
@@ -22,20 +21,19 @@ class Reader
 
     public function readEntities(FroshExportEntity $exportEntity, AbstractFormatter $formatter): void
     {
-        $language = [Defaults::LANGUAGE_SYSTEM];
+        $args = [
+            'source'              => new SystemSource(),
+            'considerInheritance' => true,
+        ];
         if ($exportEntity->getLanguageId() !== null) {
-            $language = [$exportEntity->getLanguageId()];
+            $args['languageIdChain'] = [$exportEntity->getLanguageId()];
         }
 
-        $context = new Context(
-            source: new SystemSource(),
-            languageIdChain: $language,
-            considerInheritance: true
-        );
-
+        $context            = new Context(...$args);
         $criteria           = $this->buildCriteria($exportEntity, $context);
         $entityRepository   = $this->definitionRegistry->getRepository($exportEntity->getEntity());
         $repositoryIterator = new RepositoryIterator($entityRepository, $context, $criteria);
+
         while (($result = $repositoryIterator->fetch()) !== null) {
             $formatter->enrichData($exportEntity, $result);
             if ($result->count() < $criteria->getLimit()) {
