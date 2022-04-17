@@ -38,6 +38,7 @@
     },
     "require": {
         "php": ">=8.0",
+        "ext-simplexml": "*",
         "shopware/core": "~6.4.0"
     }
 }

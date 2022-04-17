@@ -67,6 +67,7 @@
         <service id="Frosh\Exporter\Export\Formatter\AbstractFormatter"
                  public="true">
             <argument type="service" id="frosh.filesystem.public"/>
+            <argument type="service" id="event_dispatcher"/>
         </service>
 
         <service
@@ -76,8 +77,18 @@
             public="true"/>
         <service
             id="frosh.export.formatter.csv"
-            class="Frosh\Exporter\Export\Formatter\CSV"
+            class="Frosh\Exporter\Export\Formatter\Csv"
             parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
             public="true"/>
+        <service
+            id="frosh.export.formatter.xml"
+            class="Frosh\Exporter\Export\Formatter\Xml"
+            parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
+            public="true"/>
+
+        <!-- Subscriber -->
+        <service id="Frosh\Exporter\Subscriber\FroshAvailableSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
     </services>
 </container>
