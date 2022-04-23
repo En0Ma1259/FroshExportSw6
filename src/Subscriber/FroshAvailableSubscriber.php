@@ -20,7 +20,7 @@ class FroshAvailableSubscriber implements EventSubscriberInterface
     public function isAvailable(SpecialPropertyEvent $event): void
     {
         $entity = $event->getEntity();
-        if (!$entity instanceof ProductEntity && $event->getProperty() === self::PROPERTY) {
+        if (!$entity instanceof ProductEntity || $event->getProperty() !== self::PROPERTY) {
             return;
         }
 

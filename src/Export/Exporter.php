@@ -22,10 +22,10 @@ class Exporter
     ) {
     }
 
-    public function export(string $froshExportId): string
+    public function export(string $froshExportId, Context $context, ?Criteria $additionalCriteria = null): string
     {
         /** @var FroshExportEntity $froshExport */
-        $froshExport = $this->entityRepository->search(new Criteria([$froshExportId]), Context::createDefaultContext())->first();
+        $froshExport = $this->entityRepository->search(new Criteria([$froshExportId]), $context)->first();
         if ($froshExport === null) {
             throw new \InvalidArgumentException('Entity not found: ' . $froshExportId);
         }
@@ -35,12 +35,10 @@ class Exporter
             throw new \InvalidArgumentException('Formatter type invalid');
         }
 
-        $fileName = $froshExport->getId() . '/' . preg_replace('/[^A-Za-z0-9\-]/', '', $froshExport->getName());
-        $formatter->setFilename($fileName);
-
         try {
+            $formatter->setFilename($froshExport->getId() . '/' . preg_replace('/[^A-Za-z0-9\-]/', '', $froshExport->getName()));
             $formatter->startFile($froshExport);
-            $this->reader->readEntities($froshExport, $formatter);
+            $this->reader->readEntities($froshExport, $formatter, $context, $additionalCriteria);
         } finally {
             $formatter->endFile($froshExport);
 
@@ -52,6 +50,6 @@ class Exporter
             ]);
         }
 
-        return 'frosh-export/' . $formatter->getFilename(false);
+        return $formatter->getResult();
     }
 }

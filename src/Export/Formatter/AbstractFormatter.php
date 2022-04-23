@@ -55,11 +55,16 @@ abstract class AbstractFormatter
         foreach ($searchResult as $item) {
             $exportItem = new ExportItem();
             foreach ($exportEntity->getFields() as $attribute) {
-                $this->addFieldValue($item, explode('.', $attribute), $exportItem);
+                $this->addFieldValue($item, array_filter(explode('.', $attribute)), $exportItem);
             }
 
             $this->writeItem($exportItem);
         }
+    }
+
+    public function getResult(): string
+    {
+        return 'frosh-export/' . $this->getFilename(false);
     }
 
     protected function addFieldValue(Entity $entity, array $fields, ExportItem $exportItem): void
