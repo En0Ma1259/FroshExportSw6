@@ -43,6 +43,15 @@ class Csv extends AbstractFormatter
             $value = $this->formatValue($value->first(), $fields);
         }
 
-        return $value;
+        return is_string($value) ? $this->validateString($value) : $value;
+    }
+
+    protected function validateString(string $value): string
+    {
+        if (str_starts_with('"', $value) && str_ends_with('"', $value)) {
+            $value = trim($value, '"');
+        }
+
+        return '"' . str_replace('"', '""', $value) . '"';
     }
 }

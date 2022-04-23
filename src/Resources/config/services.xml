@@ -21,9 +21,7 @@
 
         <!-- Controller -->
         <service id="Frosh\Exporter\Controller\ListingExportController" public="true">
-            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
-            <argument type="service" id="api.request_criteria_builder"/>
-            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Frosh\Exporter\Export\CriteriaBuilder"/>
             <argument type="service" id="messenger.bus.shopware"/>
             <argument type="service" id="Frosh\Exporter\Export\Exporter"/>
 
@@ -43,6 +41,11 @@
         </service>
 
         <!-- Export -->
+        <service id="Frosh\Exporter\Export\CriteriaBuilder" public="true">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry"/>
+            <argument type="service" id="api.request_criteria_builder"/>
+        </service>
         <service id="Frosh\Exporter\Export\Exporter">
             <argument type="service" id="frosh_export.repository"/>
             <argument type="service" id="Frosh\Exporter\Export\Reader"/>
@@ -73,6 +76,11 @@
         <service
             id="frosh.export.formatter.json"
             class="Frosh\Exporter\Export\Formatter\Json"
+            parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
+            public="true"/>
+        <service
+            id="frosh.export.formatter.jsonNoFile"
+            class="Frosh\Exporter\Export\Formatter\JsonNoFile"
             parent="Frosh\Exporter\Export\Formatter\AbstractFormatter"
             public="true"/>
         <service

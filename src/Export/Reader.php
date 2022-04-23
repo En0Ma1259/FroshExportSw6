@@ -5,7 +5,6 @@ namespace Frosh\Exporter\Export;
 use Frosh\Exporter\Entity\FroshExportEntity;
 use Frosh\Exporter\Export\Formatter\AbstractFormatter;
 use Shopware\Core\Content\ProductStream\Service\ProductStreamBuilder;
-use Shopware\Core\Framework\Api\Context\SystemSource;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Dbal\Common\RepositoryIterator;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
@@ -19,18 +18,9 @@ class Reader
     ) {
     }
 
-    public function readEntities(FroshExportEntity $exportEntity, AbstractFormatter $formatter): void
+    public function readEntities(FroshExportEntity $exportEntity, AbstractFormatter $formatter, Context $context, ?Criteria $customCriteria = null): void
     {
-        $args = [
-            'source'              => new SystemSource(),
-            'considerInheritance' => true,
-        ];
-        if ($exportEntity->getLanguageId() !== null) {
-            $args['languageIdChain'] = [$exportEntity->getLanguageId()];
-        }
-
-        $context            = new Context(...$args);
-        $criteria           = $this->buildCriteria($exportEntity, $context);
+        $criteria           = $this->buildCriteria($exportEntity, $context, $customCriteria);
         $entityRepository   = $this->definitionRegistry->getRepository($exportEntity->getEntity());
         $repositoryIterator = new RepositoryIterator($entityRepository, $context, $criteria);
 
@@ -42,9 +32,9 @@ class Reader
         }
     }
 
-    protected function buildCriteria(FroshExportEntity $exportEntity, Context $context): Criteria
+    protected function buildCriteria(FroshExportEntity $exportEntity, Context $context, ?Criteria $customCriteria = null): Criteria
     {
-        $criteria = $exportEntity->getRealCriteria();
+        $criteria = $customCriteria ?: $exportEntity->getRealCriteria();
         $this->addAssociations($criteria, $exportEntity->getFields());
 
         if ($exportEntity->getProductStreamId() !== null) {

@@ -2,6 +2,7 @@
 
 namespace Frosh\Exporter\Struct;
 
+use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\Struct\JsonSerializableTrait;
 
 class ExportItem
@@ -10,12 +11,24 @@ class ExportItem
 
     public function set(string $property, $value): void
     {
+        if ($value instanceof Entity) {
+            $options = $value->jsonSerialize();
+            $value = new self();
+            $value->addValues($options);
+        }
+
         $this->$property = $value;
     }
 
     public function get(string $property): mixed
     {
         return $this->$property ?? null;
+    }
+
+    public function addValues(array $values): void {
+        foreach ($values as $key => $value) {
+            $this->$key = $value;
+        }
     }
 
     public function getItem(string $property): self
