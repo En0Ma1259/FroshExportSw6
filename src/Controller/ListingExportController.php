@@ -65,7 +65,12 @@ class ListingExportController extends AbstractController
             $criteria = $this->criteriaBuilder->buildCriteria($id, $request, $context);
         }
 
+        $export = $this->exporter->export($id, $context, $criteria);
+        json_decode($export);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return new JsonResponse($export, json: true);
+        }
 
-        return new Response($this->exporter->export($id, $context, $criteria));
+        return new Response($export);
     }
 }

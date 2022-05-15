@@ -1,10 +1,13 @@
-const {Component} = Shopware;
+import template from './frosh-export-create.html.twig';
 
-Component.extend('frosh-export', 'frosh-export-detail', {
+const { Component } = Shopware;
+
+Component.extend('frosh-export-create', 'frosh-export-detail', {
+    template,
+
     methods: {
         getEntity() {
             this.entity = this.froshExportRepository.create(Shopware.Context.api);
-            this.entity.default = true;
         },
 
         onClickSave() {
