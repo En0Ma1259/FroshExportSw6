@@ -6,6 +6,9 @@ use Frosh\Exporter\Event\SpecialPropertyEvent;
 use Shopware\Core\Content\Product\ProductEntity;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * Example Subscriber to add custom logic
+ */
 class FroshAvailableSubscriber implements EventSubscriberInterface
 {
     protected const PROPERTY = 'froshAvailable';

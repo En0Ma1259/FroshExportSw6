@@ -6,11 +6,15 @@ export default class FroshExportService extends ApiService {
         this.name = "froshExportService";
     }
 
-    createExport(entity, criteria) {
-        this.httpClient.post(`/frosh/export/listing/${entity}`, criteria.parse());
-    }
+    triggerExport(id, additionalParams = {}, additionalHeaders = {}) {
+        const params = additionalParams;
+        const headers = this.getBasicHeaders(additionalHeaders);
 
-    triggerExport(id) {
-        this.httpClient.get(`/frosh/export/trigger/${id}`);
+        return this.httpClient
+            .get(`/frosh/export/${id}/trigger`, {params, headers})
+            .then((response) => {
+                return ApiService.handleResponse(response);
+            });
+
     }
 }

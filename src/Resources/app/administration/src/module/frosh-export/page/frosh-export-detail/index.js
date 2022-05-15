@@ -7,7 +7,8 @@ Component.register('frosh-export-detail', {
     template,
 
     inject: [
-        'repositoryFactory'
+        'repositoryFactory',
+        'froshExportService'
     ],
 
     mixins: [
@@ -73,6 +74,10 @@ Component.register('frosh-export-detail', {
 
         saveFinish() {
             this.processSuccess = false;
+        },
+
+        triggerExport() {
+            this.froshExportService.triggerExport(this.entity.id);
         }
     }
 });

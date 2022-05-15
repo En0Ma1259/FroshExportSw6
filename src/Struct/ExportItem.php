@@ -3,6 +3,7 @@
 namespace Frosh\Exporter\Struct;
 
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\Struct\JsonSerializableTrait;
 
 class ExportItem
@@ -12,9 +13,9 @@ class ExportItem
     public function set(string $property, $value): void
     {
         if ($value instanceof Entity) {
-            $options = $value->jsonSerialize();
-            $value = new self();
-            $value->addValues($options);
+            $value = $this->convertEntity($value);
+        } elseif ($value instanceof EntityCollection) {
+            $value = $this->convertCollection($value);
         }
 
         $this->$property = $value;
@@ -25,7 +26,8 @@ class ExportItem
         return $this->$property ?? null;
     }
 
-    public function addValues(array $values): void {
+    public function addValues(array $values): void
+    {
         foreach ($values as $key => $value) {
             $this->$key = $value;
         }
@@ -52,5 +54,24 @@ class ExportItem
         }
 
         return $collection->get($id);
+    }
+
+    protected function convertEntity(Entity $entity): self
+    {
+        $options     = $entity->jsonSerialize();
+        $froshEntity = new self();
+        $froshEntity->addValues($options);
+
+        return $froshEntity;
+    }
+
+    protected function convertCollection(EntityCollection $collection): ExportItemCollection
+    {
+        $values = [];
+        foreach ($collection as $entity) {
+            $values[] = $this->convertEntity($entity);
+        }
+
+        return new ExportItemCollection($values);
     }
 }
