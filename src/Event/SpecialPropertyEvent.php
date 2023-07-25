@@ -9,7 +9,6 @@ use Shopware\Core\Framework\Event\NestedEvent;
 
 class SpecialPropertyEvent extends NestedEvent
 {
-
     public function __construct(
         protected Entity     $currentEntity,
         protected ExportItem $currentItem,

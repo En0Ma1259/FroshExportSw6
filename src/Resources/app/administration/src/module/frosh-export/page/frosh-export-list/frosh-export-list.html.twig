@@ -50,6 +50,11 @@
                         :columns="columns"
                         detailRoute="frosh.export.detail"
                     >
+                        {% block frosh_export_list_content_listing_list_data_grid_column_created %}
+                            <template #column-latestExecute="{ item }">
+                                {{ item.latestExecute | date({ hour: '2-digit', minute: '2-digit' }) }}
+                            </template>
+                        {% endblock %}
                     </sw-entity-listing>
                 </div>
             {% endblock %}

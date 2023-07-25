@@ -16,19 +16,18 @@ class Json extends AbstractFormatter
     {
         parent::startFile($exportEntity);
 
-        $this->filesystem->put($this->getFilename(), '[');
+        $this->getFileSystem()->write($this->getFilename(true), '[');
     }
 
     public function endFile(FroshExportEntity $exportEntity): void
     {
-        // TODO: Remove last ',' and empty element '{}'
-        $this->filesystem->put($this->getFilename(), '{}]');
+        $this->getFileSystem()->write($this->getFilename(true), ']');
 
         parent::endFile($exportEntity);
     }
 
-    protected function writeItem(ExportItem $item): void
+    protected function writeItem(ExportItem $item, bool $lastItem = false): void
     {
-        $this->filesystem->put($this->getFilename(), json_encode($item, JSON_THROW_ON_ERROR) . ',');
+        $this->getFileSystem()->write($this->getFilename(true), json_encode($item, JSON_THROW_ON_ERROR) . ($lastItem ? '' : ','));
     }
 }

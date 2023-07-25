@@ -6,6 +6,7 @@ use Frosh\Exporter\Entity\FroshExportEntity;
 use Frosh\Exporter\Event\SpecialPropertyEvent;
 use Frosh\Exporter\Struct\ExportItem;
 use League\Flysystem\Filesystem;
+use Shopware\Core\Defaults;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
@@ -13,58 +14,70 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFormatter
 {
-    public string $fileName;
+    protected FroshExportEntity $exportEntity;
 
     protected array $fields = [];
 
     public function __construct(
-        protected Filesystem               $filesystem,
+        protected Filesystem               $filesystemPublic,
+        protected Filesystem               $filesystemPrivate,
         protected EventDispatcherInterface $eventDispatcher
     ) {
-        $this->filesystem->getConfig()->set('disable_asserts', true);
     }
 
     abstract public static function fileExtension(): string;
 
-    abstract protected function writeItem(ExportItem $item): void;
+    abstract protected function writeItem(ExportItem $item, bool $lastItem = false): void;
 
-    public function setFilename(string $fileName): void
+    public function setExportEntity(FroshExportEntity $exportEntity): void
     {
-        $this->fileName = $fileName . '.' . static::fileExtension();
+        $this->exportEntity = $exportEntity;
+    }
+
+    public static function buildFileName(FroshExportEntity $exportEntity): string
+    {
+        return sprintf('%s/%s/%s/%s.%s',
+            'frosh-export',
+            $exportEntity->getId(),
+            $exportEntity->getLanguageId() ?? Defaults::LANGUAGE_SYSTEM,
+            strtolower(preg_replace('/[^A-Za-z0-9\-]/', '', $exportEntity->getName())),
+            static::fileExtension()
+        );
     }
 
     public function startFile(FroshExportEntity $exportEntity): void
     {
         $this->fields = $this->formatAttributes($exportEntity->getFields());
-        $this->filesystem->delete($this->getFilename());
+        $this->getFileSystem()->delete($this->getFilename(true));
     }
 
     public function endFile(FroshExportEntity $exportEntity): void
     {
-        $this->filesystem->delete($this->getFilename(false));
-        $this->filesystem->rename($this->getFilename(), $this->getFilename(false));
+        $this->getFileSystem()->move($this->getFilename(true), $this->getFilename());
     }
 
-    public function getFilename(bool $temp = true): string
+    public function getFilename(bool $temp = false): string
     {
-        return $this->fileName . ($temp ? '.temp' : '');
+        return $this->exportEntity->getFilePath() . ($temp ? '.temp' : '');
     }
 
-    public function enrichData(FroshExportEntity $exportEntity, EntitySearchResult $searchResult): void
+    public function enrichData(FroshExportEntity $exportEntity, EntitySearchResult $searchResult, bool $lastIteration): void
     {
+        $lastElementId = $searchResult->last()->getId();
+
         foreach ($searchResult as $item) {
             $exportItem = new ExportItem();
             foreach ($exportEntity->getFields() as $attribute) {
                 $this->addFieldValue($item, array_filter(explode('.', $attribute)), $exportItem);
             }
 
-            $this->writeItem($exportItem);
+            $this->writeItem($exportItem, $lastIteration && $lastElementId === $item->getId());
         }
     }
 
-    public function getResult(): string
+    protected function getFileSystem(): Filesystem
     {
-        return 'frosh-export/' . $this->getFilename(false);
+        return ($this->exportEntity->isPrivate()) ? $this->filesystemPrivate : $this->filesystemPublic;
     }
 
     protected function addFieldValue(Entity $entity, array $fields, ExportItem $exportItem): void

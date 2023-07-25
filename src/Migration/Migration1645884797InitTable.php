@@ -22,6 +22,7 @@ class Migration1645884797InitTable extends MigrationStep
                 `formatter` VARCHAR(255) NOT NULL,
                 `criteria` LONGBLOB NULL,
                 `fields` JSON NULL,
+                `is_private` TINYINT(1) unsigned NOT NULL DEFAULT 0,
                 `language_id` BINARY(16) DEFAULT NULL,
                 `user_id` BINARY(16) DEFAULT NULL,
                 `product_stream_id` BINARY(16) DEFAULT NULL,

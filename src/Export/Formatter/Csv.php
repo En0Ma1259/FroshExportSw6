@@ -12,7 +12,7 @@ class Csv extends AbstractFormatter
     {
         parent::startFile($exportEntity);
 
-        $this->filesystem->put($this->getFilename(), implode(';', array_keys($this->fields)) . "\n");
+        $this->getFileSystem()->write($this->getFilename(true), implode(';', array_keys($this->fields)) . "\n");
     }
 
     public static function fileExtension(): string
@@ -20,14 +20,14 @@ class Csv extends AbstractFormatter
         return 'csv';
     }
 
-    protected function writeItem(ExportItem $item): void
+    protected function writeItem(ExportItem $item, bool $lastItem = false): void
     {
         $values = [];
         foreach ($this->fields as $field) {
             $values[] = $this->formatValue($item, explode('.', $field));
         }
 
-        $this->filesystem->put($this->getFilename(), implode(';', $values) . "\n");
+        $this->getFileSystem()->write($this->getFilename(true), implode(';', $values) . "\n");
     }
 
     protected function formatValue(ExportItem $item, array $fields)

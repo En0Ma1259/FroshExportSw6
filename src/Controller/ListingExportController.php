@@ -6,7 +6,7 @@ use Frosh\Exporter\Export\CriteriaBuilder;
 use Frosh\Exporter\Export\Exporter;
 use Frosh\Exporter\Message\FroshExportMessage;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\Routing\Annotation\RouteScope;
+use Shopware\Core\Framework\Log\Package;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,9 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @RouteScope(scopes={"api", "administration"})
- */
+#[Route(defaults: ['_routeScope' => ['api']])]
+#[Package('administration')]
 class ListingExportController extends AbstractController
 {
     public function __construct(
@@ -27,7 +26,11 @@ class ListingExportController extends AbstractController
     }
 
     /**
-     * @Route("/api/frosh/export/{id}/criteria", name="api.frosh.export.update.criteria", methods={"POST"})
+     * @Route(
+     *     "/api/frosh/export/{id}/criteria",
+     *     name="api.frosh.export.update.criteria",
+     *     methods={"POST"}
+     * )
      */
     public function updateCustomCriteria(Request $request, Context $context, string $id): Response
     {
@@ -38,7 +41,11 @@ class ListingExportController extends AbstractController
     }
 
     /**
-     * @Route("/api/frosh/export/{id}/criteria", name="api.frosh.export.load.criteria", methods={"GET"})
+     * @Route(
+     *     "/api/frosh/export/{id}/criteria",
+     *     name="api.frosh.export.load.criteria",
+     *     methods={"GET"}
+     * )
      */
     public function loadCriteria(string $id): Response
     {
@@ -46,7 +53,11 @@ class ListingExportController extends AbstractController
     }
 
     /**
-     * @Route("/api/frosh/export/{id}/trigger", name="api.frosh.export.trigger", methods={"GET"})
+     * @Route(
+     *     "/api/frosh/export/{id}/trigger",
+     *     name="api.frosh.export.trigger",
+     *     methods={"GET"}
+     * )
      */
     public function triggerExport(string $id): Response
     {
@@ -56,7 +67,11 @@ class ListingExportController extends AbstractController
     }
 
     /**
-     * @Route("/api/frosh/export/{id}", name="api.frosh.export", methods={"POST"})
+     * @Route(
+     *     "/api/frosh/export/{id}",
+     *     name="api.frosh.export",
+     *     methods={"POST"}
+     * )
      */
     public function export(Request $request, Context $context, string $id): Response
     {

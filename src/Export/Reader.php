@@ -25,7 +25,9 @@ class Reader
         $repositoryIterator = new RepositoryIterator($entityRepository, $context, $criteria);
 
         while (($result = $repositoryIterator->fetch()) !== null) {
-            $formatter->enrichData($exportEntity, $result);
+            $lastIteration = ($result->getCriteria()->getOffset() * $result->getLimit()) < $result->getTotal();
+
+            $formatter->enrichData($exportEntity, $result, $lastIteration);
             if ($result->count() < $criteria->getLimit()) {
                 break;
             }

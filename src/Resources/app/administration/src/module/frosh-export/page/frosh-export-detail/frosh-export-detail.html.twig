@@ -34,6 +34,12 @@
 
                     <sw-card :title="$tc('frosh-export.detail.baseLabel')"
                              v-if="entity">
+                        <sw-datepicker
+                                v-model="entity.latestExecute"
+                                :label="$tc('frosh-export.detail.latestExecute')"
+                                :disabled="true"
+                                date-type="datetime-local"
+                        />
                         <sw-text-field
                                 v-model="entity.name"
                                 :label="$tc('frosh-export.detail.name')"
@@ -71,6 +77,16 @@
                         {% block frosh_export_detail_content_trigger_button %}
                             <sw-button @click="triggerExport">
                                 {{ $tc('frosh-export.detail.triggerButton') }}
+                            </sw-button>
+                        {% endblock %}
+
+                        {% block frosh_export_detail_content_download_button %}
+                            <sw-button
+                                    class="action"
+                                    :disabled="entity.isPrivate || isDownloading"
+                                    @click="downloadExport"
+                            >
+                                {{ $tc('frosh-export.detail.downloadButton') }}
                             </sw-button>
                         {% endblock %}
                     </sw-card>

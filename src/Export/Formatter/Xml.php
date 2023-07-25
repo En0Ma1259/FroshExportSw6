@@ -16,17 +16,17 @@ class Xml extends AbstractFormatter
     {
         parent::startFile($exportEntity);
 
-        $this->filesystem->put($this->getFilename(), '<?xml version="1.0"?><items>');
+        $this->getFileSystem()->write($this->getFilename(true), '<?xml version="1.0"?><items>');
     }
 
     public function endFile(FroshExportEntity $exportEntity): void
     {
-        $this->filesystem->put($this->getFilename(), '</items>');
+        $this->getFileSystem()->write($this->getFilename(true), '</items>');
 
         parent::endFile($exportEntity);
     }
 
-    protected function writeItem(ExportItem $item): void
+    protected function writeItem(ExportItem $item, bool $lastItem = false): void
     {
         $array = json_decode(json_encode($item), true);
 
@@ -34,7 +34,7 @@ class Xml extends AbstractFormatter
         $this->addDataToNode($item, $array);
         $xml = mb_strstr($item->asXML(), '<item>');
 
-        $this->filesystem->put($this->getFilename(), $xml);
+        $this->getFileSystem()->write($this->getFilename(true), $xml);
     }
 
     private function addDataToNode(\SimpleXMLElement $node, array $data): void

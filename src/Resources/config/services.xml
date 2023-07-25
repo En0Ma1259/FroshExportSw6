@@ -7,7 +7,13 @@
         <parameter key="frosh-export.filesystem.public" type="collection">
             <parameter key="type">frosh</parameter>
             <parameter key="config" type="collection">
-                <parameter key="root">%kernel.project_dir%/public/frosh-export</parameter>
+                <parameter key="root">%kernel.project_dir%/public</parameter>
+            </parameter>
+        </parameter>
+        <parameter key="frosh-export.filesystem.private" type="collection">
+            <parameter key="type">frosh</parameter>
+            <parameter key="config" type="collection">
+                <parameter key="root">%kernel.project_dir%/files</parameter>
             </parameter>
         </parameter>
     </parameters>
@@ -67,9 +73,14 @@
             <factory service="Shopware\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="factory"/>
             <argument>%frosh-export.filesystem.public%</argument>
         </service>
+        <service class="League\Flysystem\FilesystemInterface" id="frosh.filesystem.private" public="true">
+            <factory service="Shopware\Core\Framework\Adapter\Filesystem\FilesystemFactory" method="privateFactory"/>
+            <argument>%frosh-export.filesystem.private%</argument>
+        </service>
         <service id="Frosh\Exporter\Export\Formatter\AbstractFormatter"
                  public="true">
             <argument type="service" id="frosh.filesystem.public"/>
+            <argument type="service" id="frosh.filesystem.private"/>
             <argument type="service" id="event_dispatcher"/>
         </service>
 
@@ -95,6 +106,12 @@
             public="true"/>
 
         <!-- Subscriber -->
+        <service id="Frosh\Exporter\Subscriber\FilePathSubscriber">
+            <argument type="service" id="service_container"/>
+
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <service id="Frosh\Exporter\Subscriber\FroshAvailableSubscriber">
             <tag name="kernel.event_subscriber"/>
         </service>

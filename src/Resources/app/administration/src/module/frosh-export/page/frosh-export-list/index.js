@@ -58,6 +58,13 @@ Component.register('frosh-export-list', {
                     inlineEdit: 'string',
                     allowResize: true,
                     primary: true
+                },
+                {
+                    property: 'latestExecute',
+                    dataIndex: 'latestExecute',
+                    label: this.$tc('frosh-export.detail.latestExecute'),
+                    allowResize: true,
+                    primary: true
                 }
             ];
         },

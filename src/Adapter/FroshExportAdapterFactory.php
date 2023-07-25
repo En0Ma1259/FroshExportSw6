@@ -2,23 +2,33 @@
 
 namespace Frosh\Exporter\Adapter;
 
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\AdapterInterface;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Shopware\Core\Framework\Adapter\Filesystem\Adapter\AdapterFactoryInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FroshExportAdapterFactory implements AdapterFactoryInterface
 {
-    public function create(array $config): AdapterInterface
+    public function create(array $config): FilesystemAdapter
     {
         $options = $this->resolveOptions($config);
 
-        return new Local(
+        return new LocalFilesystemAdapter(
             $options['root'],
-            \LOCK_EX | FILE_APPEND,
-            Local::DISALLOW_LINKS,
-            $options
+            PortableVisibilityConverter::fromArray([
+                'file' => $options['file'],
+                'dir' => $options['dir'],
+            ]),
+
+            // Write flags
+            LOCK_EX | FILE_APPEND,
+
+            // How to deal with links, either DISALLOW_LINKS or SKIP_LINKS
+            // Disallowing them causes exceptions when encountered
+            LocalFilesystemAdapter::DISALLOW_LINKS
         );
+
     }
 
     public function getType(): string
@@ -41,9 +51,9 @@ class FroshExportAdapterFactory implements AdapterFactoryInterface
         $options->setDefault('file', []);
         $options->setDefault('dir', []);
 
-        $config         = $options->resolve($config);
+        $config = $options->resolve($config);
         $config['file'] = $this->resolveFilePermissions($config['file']);
-        $config['dir']  = $this->resolveDirectoryPermissions($config['dir']);
+        $config['dir'] = $this->resolveDirectoryPermissions($config['dir']);
 
         return $config;
     }

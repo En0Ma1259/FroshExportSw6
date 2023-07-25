@@ -22,7 +22,7 @@ class JsonNoFile extends AbstractFormatter
     {
     }
 
-    protected function writeItem(ExportItem $item): void
+    protected function writeItem(ExportItem $item, bool $lastItem = false): void
     {
         $this->items[] = $item;
     }
