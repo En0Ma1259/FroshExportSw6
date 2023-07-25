@@ -13,20 +13,23 @@ class FroshExportEntity extends Entity
 {
     use EntityIdTrait;
 
-    protected string  $entity;
-    protected string  $formatter;
+    protected string $entity;
+    protected string $formatter;
     protected ?string $name;
     protected ?string $criteria;
     protected ?string $userId;
     protected ?string $productStreamId;
     protected ?string $languageId;
+    protected ?string $filePath;
 
     protected array $fields;
 
-    protected ?UserEntity          $user          = null;
+    protected bool $isPrivate;
+
+    protected ?UserEntity $user = null;
     protected ?ProductStreamEntity $productStream = null;
-    protected ?LanguageEntity      $language      = null;
-    protected Criteria             $realCriteria;
+    protected ?LanguageEntity $language = null;
+    protected Criteria $realCriteria;
 
     public function getEntity(): string
     {
@@ -115,5 +118,25 @@ class FroshExportEntity extends Entity
         }
 
         return $this->realCriteria;
+    }
+
+    public function isPrivate(): bool
+    {
+        return $this->isPrivate;
+    }
+
+    public function setIsPrivate(bool $isPrivate): void
+    {
+        $this->isPrivate = $isPrivate;
+    }
+
+    public function getFilePath(): ?string
+    {
+        return $this->filePath;
+    }
+
+    public function setFilePath(string $filePath): void
+    {
+        $this->filePath = $filePath;
     }
 }

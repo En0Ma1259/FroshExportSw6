@@ -7,7 +7,7 @@ use Frosh\Exporter\Entity\FroshExportEntity;
 use Frosh\Exporter\Export\Formatter\AbstractFormatter;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -16,9 +16,9 @@ class Exporter
     public const FORMATTER_TAG = 'frosh.export.formatter.';
 
     public function __construct(
-        protected EntityRepositoryInterface $entityRepository,
-        protected Reader                    $reader,
-        protected ContainerInterface        $container
+        protected EntityRepository   $entityRepository,
+        protected Reader             $reader,
+        protected ContainerInterface $container
     ) {
     }
 
@@ -36,12 +36,13 @@ class Exporter
         }
 
         try {
-            $formatter->setFilename($froshExport->getId() . '/' . preg_replace('/[^A-Za-z0-9\-]/', '', $froshExport->getName()));
+            $formatter->setExportEntity($froshExport);
             $formatter->startFile($froshExport);
-            $this->reader->readEntities($froshExport, $formatter, $context, $additionalCriteria);
-        } finally {
-            $formatter->endFile($froshExport);
 
+            $this->reader->readEntities($froshExport, $formatter, $context, $additionalCriteria);
+
+            $formatter->endFile($froshExport);
+        } finally {
             /** @var Connection $connection */
             $connection = $this->container->get(Connection::class);
             $connection->executeStatement('UPDATE `frosh_export` SET `latest_execute` = :now WHERE `id` = UNHEX(:id)', [
@@ -50,6 +51,6 @@ class Exporter
             ]);
         }
 
-        return $formatter->getResult();
+        return $formatter->getFilename();
     }
 }

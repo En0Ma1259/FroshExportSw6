@@ -26,6 +26,7 @@ Component.register('frosh-export-detail', {
             entity: null,
             isLoading: false,
             processSuccess: false,
+            isDownloading: false
         };
     },
 
@@ -78,6 +79,19 @@ Component.register('frosh-export-detail', {
 
         triggerExport() {
             this.froshExportService.triggerExport(this.entity.id);
+        },
+
+        // TODO: make private downloadable
+        downloadExport() {
+            this.isDownloading = true;
+
+            const link = document.createElement('a');
+            link.href = '/' + this.entity.filePath;
+            link.download = this.entity.name;
+            link.dispatchEvent(new MouseEvent('click'));
+            link.remove();
+
+            this.isDownloading = false;
         }
     }
 });
